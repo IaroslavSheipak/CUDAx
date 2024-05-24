@@ -1,5 +1,6 @@
-#include <MatrixMul.cuh>
 #include <stdio.h>
+#include <cuda_runtime.h>
+#include "../include/MatrixMul.cuh"
 
 __global__
 void MatrixMul(int heightA, int widthA, int widthB, float *matrixA, float *matrixB, float *matrixResult) {
@@ -39,6 +40,13 @@ int main() {
 
     MatrixMul<<<gridDim, blockDim>>>(heightA, widthA, widthB, d_matrixA, d_matrixB, d_matrixResult);
 
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    }
+
+    cudaDeviceSynchronize();
+
     cudaMemcpy(h_matrixResult, d_matrixResult, heightA * widthB * sizeof(float), cudaMemcpyDeviceToHost);
 
     for (int i = 0; i < heightA; ++i) {
@@ -54,4 +62,3 @@ int main() {
 
     return 0;
 }
-
